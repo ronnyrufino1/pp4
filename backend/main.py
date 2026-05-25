@@ -46,13 +46,6 @@ def get_session():
 
 from .schemas import ClienteCreate, ClienteRead, ProcessoCreate, ProcessoRead
 from . import crud
-
-
-def get_session():
-    with Session(engine) as session:
-        yield session
-
-
 from .models import Cliente, Processo
 from .schemas import ClienteCreate, ClienteRead, ProcessoCreate, ProcessoRead
 from . import crud
