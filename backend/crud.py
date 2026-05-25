@@ -29,16 +29,26 @@ def buscar_cliente(id_: int, session: Session) -> Cliente:
         raise ValueError("Cliente não encontrado")
     return c
 
-def atualizar_cliente(id_: int, data: ClienteCreate, session: Session) -> Cliente:
-    c = buscar_cliente(id_, session)
-    dump_data = data.model_dump() if hasattr(data, "model_dump") else data.dict()
-    for k, v in dump_data.items():
-        setattr(c, k, v)
-    session.add(c)
-    session.commit()
-    session.refresh(c)
-    return c
-
+def atualizar_cliente(id_: int, data: ClienteCreate, session: Optional[Session] = None) -> Cliente:
+    if session is None:
+        from backend.main import engine
+        with Session(engine) as nova_sessao:
+            c = buscar_cliente(id_, nova_sessao)
+            for k, v in data.model_dump().items():
+                setattr(c, k, v)
+            nova_sessao.add(c)
+            nova_sessao.commit()
+            nova_sessao.refresh(c)
+            return c
+    else:
+        c = buscar_cliente(id_, session)
+        for k, v in data.model_dump().items():
+            setattr(c, k, v)
+        session.add(c)
+        session.commit()
+        session.refresh(c)
+        return c
+    
 def deletar_cliente(id_: int, session: Optional[Session] = None):
     if session is None:
         from backend.main import engine
