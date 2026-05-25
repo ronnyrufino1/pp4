@@ -1,0 +1,57 @@
+# ==========================================
+# 1. ESPECÍFICO DO PROJETO LEGALTECH
+# ==========================================
+# Ignorar a base de dados SQLite local e ficheiros temporários de escrita
+*.db
+*.db-journal
+*.db-wal
+
+# Ignorar o ficheiro de configuração de variáveis de ambiente globais (segurança)
+.env
+
+# ==========================================
+# 2. AMBIENTES VIRTUAIS E DEPENDÊNCIAS (PYTHON)
+# ==========================================
+# Ignorar pastas de ambientes virtuais do Python
+env/
+venv/
+.venv/
+ENV/
+*env/
+
+# Ignorar ambientes do Anaconda/Conda (migi_env)
+.conda/
+conda-bld/
+
+# ==========================================
+# 3. CACHES E ARQUIVOS COMPILADOS DO PYTHON
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# ==========================================
+# 4. SISTEMA OPERACIONAL (SISTEMA)
+# ==========================================
+# macOS (Essencial para o seu MacBook Pro)
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Windows
+Desktop.ini
+ehthumbs.db
+
+# ==========================================
+# 5. EDITORES DE CÓDIGO E IDEs
+# ==========================================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
