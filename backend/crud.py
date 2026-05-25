@@ -93,27 +93,25 @@ def buscar_processo(id_: int, session: Session) -> Processo:
         raise ValueError("Processo não encontrado")
     return p
 
-def atualizar_processo(id_: int, data: ProcessoCreate, session: Session) -> Processo:
-    proc = buscar_processo(id_, session)
-    old_status = proc.status
-    
-    dump_data = data.model_dump() if hasattr(data, "model_dump") else data.dict()
-    for k, v in dump_data.items():
-        setattr(proc, k, v)
-
-    session.add(proc)
-    session.commit()
-    session.refresh(proc)
-
-    if old_status != proc.status:
-        cliente = buscar_cliente(proc.cliente_id, session)
-        send_email(
-            to_email=cliente.email,
-            subject=f"Status do processo atualizado: {proc.numero}",
-            body=f"Aviso legaltech:\nSeu processo foi atualizado.\nNovo Status: {proc.status}\nDescrição: {proc.descricao}"
-        )
-
-    return proc
+def atualizar_cliente(id_: int, data: ClienteCreate, session: Optional[Session] = None) -> Cliente:
+    if session is None:
+        from backend.main import engine
+        with Session(engine) as nova_sessao:
+            c = buscar_cliente(id_, nova_sessao)
+            for k, v in data.model_dump().items():
+                setattr(c, k, v)
+            nova_sessao.add(c)
+            nova_sessao.commit()
+            nova_sessao.refresh(c)
+            return c
+    else:
+        c = buscar_cliente(id_, session)
+        for k, v in data.model_dump().items():
+            setattr(c, k, v)
+        session.add(c)
+        session.commit()
+        session.refresh(c)
+        return c
 
 def deletar_processo(id_: int, session: Optional[Session] = None):
     if session is None:

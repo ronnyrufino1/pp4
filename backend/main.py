@@ -91,15 +91,6 @@ def deletar_cliente_api(id_: int):
     except ValueError:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
 
-@app.delete("/processos/{id_}", status_code=204)
-def deletar_processo_api(id_: int):
-    try:
-        crud.deletar_processo(id_)
-        return Response(status_code=204)
-    except ValueError:
-        raise HTTPException(status_code=404, detail="Processo não encontrado")
-    
-
 
 # ==========================================
 # ==========================================
@@ -136,9 +127,9 @@ def atualizar_processo_api(id_: int, data: ProcessoCreate, session: Session = De
 def deletar_processo_api(id_: int, session: Session = Depends(get_session)):
     try:
         crud.deletar_processo(id_=id_, session=session)
-        return {"detail": "Processo deletado com sucesso"}
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        return Response(status_code=204)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Processo não encontrado ou já deletado.") 
 
 @app.get("/processos/cliente/{cliente_id}", response_model=List[ProcessoRead])
 def listar_processos_por_cliente_api(cliente_id: int, session: Session = Depends(get_session)):
