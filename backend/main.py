@@ -1,7 +1,7 @@
 import os
 from contextlib import asynccontextmanager
 from typing import List
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel, create_engine, Session
 from dotenv import load_dotenv
@@ -51,7 +51,6 @@ from .schemas import ClienteCreate, ClienteRead, ProcessoCreate, ProcessoRead
 from . import crud
 
 
-
 # ==========================================
 # ==========================================
 # ROTAS - CLIENTES
@@ -73,15 +72,12 @@ def buscar_cliente_api(id_: int, session: Session = Depends(get_session)):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-
 @app.put("/clientes/{id_}", response_model=ClienteRead)
 def atualizar_cliente_api(id_: int, data: ClienteCreate, session: Session = Depends(get_session)):
     try:
         return crud.atualizar_cliente(id_, data)
     except ValueError:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
-
-from fastapi import Response
 
 @app.delete("/clientes/{id_}", status_code=204)
 def deletar_cliente_api(id_: int):
