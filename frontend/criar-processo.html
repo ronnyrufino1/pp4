@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Novo Processo - LegalTech</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="css/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+
+    <div class="container mt-4" style="max-width: 700px">
+      <div class="card shadow-sm p-4">
+        <h2 class="mb-4">Novo Processo</h2>
+
+        <form id="processo-form">
+          <div class="mb-3">
+            <label for="cliente-select" class="form-label fw-bold"
+              >Selecione o Cliente Associado:</label
+            >
+            <select id="cliente-select" class="form-select" required>
+              <option value="">-- Escolha um cliente --</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Número do Processo (CNJ):</label>
+            <input
+              type="text"
+              name="numero"
+              class="form-control"
+              placeholder="0000000-00.0000.0.00.0000"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold"
+              >Descrição / Resumo do Caso:</label
+            >
+            <textarea
+              name="descricao"
+              class="form-control"
+              rows="4"
+              placeholder="Detalhes do processo..."
+              required
+            ></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Status Inicial:</label>
+            <select name="status" class="form-select" required>
+              <option value="Ativo" selected>Ativo</option>
+              <option value="Suspenso">Suspenso</option>
+              <option value="Arquivado">Arquivado</option>
+            </select>
+          </div>
+
+          <div class="d-flex justify-content-between mt-4">
+            <a href="lista-processos.html" class="btn btn-secondary"
+              >Cancelar</a
+            >
+            <button type="submit" class="btn btn-primary">
+              Salvar Processo
+            </button>
+          </div>
+        </form>
+
+        <div id="mensagem" class="mt-3"></div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        $("#navbar-container").load("navbar.html");
+
+        if (typeof popularSelectClientes === "function") {
+          popularSelectClientes("#cliente-select");
+        }
+
+        $("#processo-form").submit(function (e) {
+          e.preventDefault();
+
+          const payload = {
+            cliente_id: parseInt($("#cliente-select").val()),
+            numero: $("#processo-form [name=numero]").val(),
+            descricao: $("#processo-form [name=descricao]").val(),
+            status: $("#processo-form [name=status]").val(),
+          };
+
+          $.ajax({
+            url: "http://127.0.0.1:8000/processos/",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(payload),
+            success: function (data) {
+              $("#mensagem").html(
+                `<div class="alert alert-success shadow-sm">Processo criado com sucesso! O e-mail simulado foi gerado no terminal do backend.</div>`,
+              );
+              $("#processo-form")[0].reset();
+            },
+            error: function (xhr) {
+              $("#mensagem").html(
+                `<div class="alert alert-danger shadow-sm">Erro ao criar o processo. Verifique as informações ou o console.</div>`,
+              );
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

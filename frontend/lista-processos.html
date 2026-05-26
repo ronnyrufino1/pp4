@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Processos - LegalTech</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="css/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Painel de Processos</h1>
+        <a href="criar-processo.html" class="btn btn-primary">Novo Processo</a>
+      </div>
+
+      <div class="row bg-light p-3 rounded mb-4 shadow-sm align-items-end">
+        <div class="col-md-8">
+          <label for="cliente-filtro" class="form-label fw-bold"
+            >Filtrar por Cliente específico:</label
+          >
+          <select id="cliente-filtro" class="form-select">
+            <option value="">-- Exibir Todos os Processos --</option>
+          </select>
+        </div>
+        <div class="col-md-4 mt-2">
+          <button id="filtrar" class="btn btn-secondary w-100 fw-bold">
+            Aplicar Filtro
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive shadow-sm rounded">
+        <table class="table table-striped table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Nº do Processo (CNJ)</th>
+              <th>Status Atual</th>
+              <th>Descrição Resumida</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="processos-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        $("#navbar-container").load("navbar.html");
+
+        if (typeof popularSelectClientes === "function") {
+          popularSelectClientes("#cliente-filtro");
+        }
+
+        if (typeof carregarProcessos === "function") {
+          carregarProcessos();
+        }
+
+        $("#filtrar").click(function () {
+          const cid = $("#cliente-filtro").val();
+          if (cid) {
+            $.get(
+              `http://127.0.0.1:8000/processos/cliente/${cid}`,
+              function (data) {
+                renderizarTabelaProcessos(data);
+              },
+            );
+          } else {
+            carregarProcessos();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
