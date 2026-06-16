@@ -6,7 +6,6 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 FRONTEND_URL = os.getenv("FRONTEND_URL")
 
-# Simulação de e-mail (usado para evitar enviar emails reais na Sprint)
 class EmailSettings:
     SMTP_SERVER = os.getenv("EMAIL_SMTP_SERVER", "smtp.example.com")
     PORT = int(os.getenv("EMAIL_PORT", 587))

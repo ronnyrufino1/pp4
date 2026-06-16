@@ -55,3 +55,11 @@ ehthumbs.db
 *.njsproj
 *.sln
 *.swp
+
+#==========================================
+# 6. ARQUIVOS
+# ==========================================
+
+geradorCLientes.py
+geradorProcessos.py
+dados.py

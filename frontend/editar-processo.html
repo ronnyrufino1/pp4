@@ -20,13 +20,7 @@
           <input type="hidden" id="cliente-id-salvo" />
           <div class="mb-3">
             <label class="form-label">Número do Processo:</label>
-            <input
-              type="text"
-              id="numero"
-              class="form-control"
-              readonly
-              disabled
-            />
+            <input type="text" id="numero" class="form-control" readonly />
             <small class="text-muted"
               >O número do processo não pode ser modificado após o
               registro.</small
@@ -67,12 +61,13 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/main.js"></script>
     <script>
       $(document).ready(function () {
         $("#navbar-container").load("navbar.html");
 
         const urlParams = new URLSearchParams(window.location.search);
-        const pid = urlParams.get("id");
+        const pid = parseInt(urlParams.get("id"));
 
         if (!pid) {
           $("#mensagem").html(
@@ -84,42 +79,15 @@
         $.get(`http://127.0.0.1:8000/processos/${pid}`, function (data) {
           $("#proc-id").val(pid);
           $("#cliente-id-salvo").val(data.cliente_id);
-          $("#numero").val(data.numero);
+
+          // Mapeia para as chaves reais retornadas pelo backend
+          $("#numero").val(data.numero_cnj || data.numero);
           $("#descricao").val(data.descricao);
           $("#status-select").val(data.status);
         }).fail(function () {
           $("#mensagem").html(
             `<div class="alert alert-danger">Processo com ID ${pid} não existe.</div>`,
           );
-        });
-
-        $("#editar-form").submit(function (e) {
-          e.preventDefault();
-
-          const id = parseInt($("#proc-id").val());
-          const payload = {
-            cliente_id: parseInt($("#cliente-id-salvo").val()),
-            numero: $("#numero").val(),
-            descricao: $("#descricao").val(),
-            status: $("#status-select").val(),
-          };
-
-          $.ajax({
-            url: `http://127.0.0.1:8000/processos/${id}`,
-            method: "PUT",
-            contentType: "application/json",
-            data: JSON.stringify(payload),
-            success: function (data) {
-              $("#mensagem").html(
-                `<div class="alert alert-success">Processo modificado com sucesso! Caso o status tenha mudado, um e-mail foi gerado para o cliente.</div>`,
-              );
-            },
-            error: function (xhr) {
-              $("#mensagem").html(
-                `<div class="alert alert-danger">Erro de processamento HTTP ${xhr.status}. Falha ao atualizar.</div>`,
-              );
-            },
-          });
         });
       });
     </script>
