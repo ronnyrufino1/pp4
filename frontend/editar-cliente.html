@@ -72,9 +72,7 @@
         const clienteId = parseInt(urlParams.get("id"));
 
         if (!clienteId) {
-          $("#mensagem").html(
-            '<div class="alert alert-danger mt-3">ID do cliente não foi fornecido.</div>',
-          );
+          exibirToast("ID do cliente não foi fornecido.", "danger");
           $("button[type='submit']").prop("disabled", true);
           return;
         }

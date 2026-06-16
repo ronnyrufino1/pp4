@@ -50,30 +50,6 @@
           listarClientes();
         }
       });
-      $(document).on("click", ".btn-deletar-cliente", function () {
-        const id = $(this).data("id");
-        const nome = $(this).data("nome");
-
-        if (
-          confirm(
-            `Tem certeza que deseja excluir o cliente "${nome}"? Esta ação não pode ser desfeita.`,
-          )
-        ) {
-          $.ajax({
-            url: `http://127.0.0.1:8000/clientes/${id}`,
-            method: "DELETE",
-            success: function () {
-              alert("Cliente excluído com sucesso!");
-              listarClientes();
-            },
-            error: function (xhr) {
-              alert(
-                `Erro ao excluir cliente: O cliente pode possuir processos vinculados.`,
-              );
-            },
-          });
-        }
-      });
     </script>
   </body>
 </html>

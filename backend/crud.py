@@ -2,8 +2,6 @@ from typing import List, Optional
 from sqlmodel import Session, select
 from .models import Cliente, Processo
 from .schemas import ClienteCreate, ProcessoCreate
-from .email_service import send_email
-
 
 # ==========================================
 # ==========================================

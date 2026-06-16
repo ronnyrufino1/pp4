@@ -2,7 +2,7 @@ import os
 import re
 from contextlib import asynccontextmanager
 from typing import List, Optional
-from fastapi import Depends, FastAPI, HTTPException, Response, status
+from fastapi import Depends, FastAPI, HTTPException, Response, status, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
@@ -20,7 +20,7 @@ from backend import crud
 from backend.security import gerar_hash_senha, verificar_senha
 from backend.auth import criar_token_acesso, obter_usuario_atual, RequererRole
 from backend.database import engine, get_session
-
+from backend.email_service import enviar_email_boas_vindas, enviar_email_movimentacao
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Servidor iniciando... Criando tabelas!")
@@ -53,8 +53,31 @@ def raiz():
 
 CODIGO_MESTRE_ADMIN = "LegalTech2026" # Código de segurança
 
-@app.post("/auth/cadastro", response_model=UsuarioRead, status_code=201)
-def cadastrar_usuario_api(usuario_in: UsuarioCreate, session: Session = Depends(get_session)):
+# ==========================================
+# REQUISITO 2 - CADASTRO DE USUÁRIO (ABERTO AO PÚBLICO)
+# ==========================================
+
+@app.post("/usuarios", response_model=UsuarioRead, status_code=201)
+def cadastrar_usuario_api(
+    usuario_in: UsuarioCreate, 
+    background_tasks: BackgroundTasks, # Permite o envio do e-mail em segundo plano
+    session: Session = Depends(get_session)
+):
+    # 1. VALIDAÇÃO: Verifica se o e-mail já está cadastrado no sistema (Evita duplicidade)
+    email_existe = session.exec(select(Usuario).where(Usuario.email == usuario_in.email)).first()
+    if email_existe:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, 
+            detail="O endereço de e-mail informado já está em uso por outra conta."
+        )
+        
+    cpf_existe = session.exec(select(Usuario).where(Usuario.cpf == usuario_in.cpf)).first()
+    if cpf_existe:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Este CPF já está cadastrado no sistema."
+        )
+
     try:
         perfil_final = "comum"
         if usuario_in.role == "adm":
@@ -78,10 +101,12 @@ def cadastrar_usuario_api(usuario_in: UsuarioCreate, session: Session = Depends(
         session.add(novo_usuario)
         session.commit()
         session.refresh(novo_usuario)
+        
+        background_tasks.add_task(enviar_email_boas_vindas, novo_usuario.email, novo_usuario.nome)
+        
         return novo_usuario
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Este CPF já está cadastrado.")
-    
+        raise HTTPException(status_code=400, detail="Erro de integridade ao salvar o usuário.")    
 # ==========================================
 # ==========================================
 # ROTAS - AUTENTCAÇÁO
@@ -131,30 +156,29 @@ def listar_clientes_api(
     }
 
 
-@app.get("/clientes/{id_}", response_model=ClienteRead, dependencies=[Depends(RequererRole(["adm", "comum"]))])
-def buscar_cliente_api(id_: int, session: Session = Depends(get_session)):
+@app.get("/clientes/{id}", response_model=ClienteRead, dependencies=[Depends(RequererRole(["adm", "comum"]))])
+def buscar_cliente_api(id: int, session: Session = Depends(get_session)):
     try:
-        return crud.buscar_cliente(id_=id_, session=session)
+        return crud.buscar_cliente(id_=id, session=session) # Mantém id_=id para o seu crud
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@app.put("/clientes/{id_}", response_model=ClienteRead, dependencies=[Depends(RequererRole(["adm"]))])
-def atualizar_cliente_api(id_: int, data: ClienteCreate, session: Session = Depends(get_session)):
+@app.put("/clientes/{id}", response_model=ClienteRead, dependencies=[Depends(RequererRole(["adm"]))])
+def atualizar_cliente_api(id: int, data: ClienteCreate, session: Session = Depends(get_session)):
     try:
-        return crud.atualizar_cliente(id_, data)
+        return crud.atualizar_cliente(id, data)
     except ValueError:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
     
 
-@app.delete("/clientes/{id_}", status_code=204, dependencies=[Depends(RequererRole(["adm"]))])
-def deletar_cliente_api(id_: int):
+@app.delete("/clientes/{id}", status_code=204, dependencies=[Depends(RequererRole(["adm"]))])
+def deletar_cliente_api(id: int):
     try:
-        crud.deletar_cliente(id_)
+        crud.deletar_cliente(id)
         return Response(status_code=204)
     except ValueError:
-        raise HTTPException(status_code=404, detail="Cliente não encontrado")
-    
+        raise HTTPException(status_code=404, detail="Cliente não encontrado")    
 
 # ==========================================
 # ROTAS - PROCESSOS
@@ -178,7 +202,7 @@ def criar_processo_api(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@app.get("/processos/", response_model=ProcessoPaginadoResponse)  # <-- Agora o tipo será reconhecido!
+@app.get("/processos/", response_model=ProcessoPaginadoResponse)  
 def listar_processos_api(
     limit: int = 10, 
     offset: int = 0, 
@@ -204,38 +228,60 @@ def listar_processos_api(
     }
 
 
-@app.get("/processos/{id_}", response_model=ProcessoRead)
+@app.get("/processos/{id}", response_model=ProcessoRead)
 def buscar_processo_api(
-    id_: int, 
+    id: int, 
     session: Session = Depends(get_session), 
     usuario_logado: Usuario = Depends(RequererRole(["adm", "comum"]))
 ):
     try:
-        return crud.buscar_processo(id_=id_, session=session)
+        return crud.buscar_processo(id_=id, session=session)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@app.put("/processos/{id_}", response_model=ProcessoRead)
+@app.put("/processos/{id}", response_model=ProcessoRead)
 def atualizar_processo_api(
-    id_: int, 
-    data: ProcessoUpdate, 
+    id: int,
+    data: ProcessoUpdate,
+    background_tasks: BackgroundTasks,
     session: Session = Depends(get_session),
     usuario_logado: Usuario = Depends(RequererRole(["adm", "comum"]))
 ):
     try:
-        return crud.atualizar_processo(id_=id_, data=data, session=session)
+        proc_atualizado = crud.atualizar_processo(id_=id, data=data, session=session)
+        
+        if proc_atualizado and proc_atualizado.cliente_id:
+            from backend.models import Cliente 
+            cliente = session.get(Cliente, proc_atualizado.cliente_id)
+            
+            if cliente and cliente.email:
+                num_proc = proc_atualizado.numero_cnj or proc_atualizado.numero or str(id)
+                
+                from backend.email_service import enviar_email_movimentacao
+                
+                background_tasks.add_task(
+                    enviar_email_movimentacao,
+                    email_destino=cliente.email,
+                    nome_cliente=cliente.nome,
+                    numero_processo=num_proc,
+                    nova_descricao=data.descricao
+                )
+                print(f"==> [BACKEND] Disparo de e-mail agendado para: {cliente.email}")
+
+        return proc_atualizado
+        
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     
-@app.delete("/processos/{id_}", status_code=204)
+@app.delete("/processos/{id}", status_code=204)
 def deletar_processo_api(
-    id_: int, 
+    id: int, 
     session: Session = Depends(get_session), 
     usuario_logado: Usuario = Depends(RequererRole(["adm", "comum"]))
 ):
     try:
-        crud.deletar_processo(id_=id_, session=session)
+        crud.deletar_processo(id_=id, session=session)
         return Response(status_code=204)
     except ValueError:
         raise HTTPException(status_code=404, detail="Processo não encontrado ou já deletado.")

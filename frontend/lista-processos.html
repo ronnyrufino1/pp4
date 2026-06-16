@@ -97,7 +97,7 @@
                 renderizarTabelaProcessos(lista);
               },
             ).fail(function () {
-              alert("Erro ao filtrar processos deste cliente.");
+              exibirToast("Erro ao filtrar processos deste cliente.", "danger");
             });
           } else {
             if (typeof carregarProcessos === "function") {

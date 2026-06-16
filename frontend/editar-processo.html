@@ -70,9 +70,7 @@
         const pid = parseInt(urlParams.get("id"));
 
         if (!pid) {
-          $("#mensagem").html(
-            `<div class="alert alert-danger">ID do processo não foi fornecido na URL.</div>`,
-          );
+          exibirToast("ID do processo não foi fornecido na URL.", "danger");
           return;
         }
 
@@ -85,9 +83,7 @@
           $("#descricao").val(data.descricao);
           $("#status-select").val(data.status);
         }).fail(function () {
-          $("#mensagem").html(
-            `<div class="alert alert-danger">Processo com ID ${pid} não existe.</div>`,
-          );
+          exibirToast(`Processo com ID ${pid} não existe.`, "danger");
         });
       });
     </script>

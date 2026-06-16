@@ -57,8 +57,6 @@
             </button>
           </div>
         </form>
-
-        <div id="mensagem" class="mt-3"></div>
       </div>
     </div>
 
@@ -92,14 +90,16 @@
             contentType: "application/json",
             data: JSON.stringify(formData),
             success: function (data) {
-              $("#mensagem").html(
-                `<div class="alert alert-success shadow-sm">Cliente cadastrado com sucesso! <a href="index-clientes.html" class="fw-bold">Ir para a listagem</a></div>`,
-              );
+              exibirToast("Cliente cadastrado com sucesso!", "success");
               $("#cliente-form")[0].reset();
+              setTimeout(function () {
+                window.location.href = "index-clientes.html";
+              }, 1500);
             },
             error: function (xhr) {
-              $("#mensagem").html(
-                `<div class="alert alert-danger shadow-sm">Erro ao criar cliente. CPF já cadastrado. (${xhr.status}).</div>`,
+              exibirToast(
+                `Erro ao criar cliente. CPF ou dados já cadastrados (${xhr.status}).`,
+                "danger",
               );
             },
           });
