@@ -41,13 +41,14 @@ def enviar_email_movimentacao(email_destino: str, nome_cliente: str, numero_proc
         return
     corpo = f"""Olá, {nome_cliente}!
 
-                Informamos que o seu processo número {numero_processo} sofreu uma nova atualização.
+    Informamos que o seu processo número 
+    {numero_processo} 
+    sofreu uma nova atualização.
 
-                Nova movimentação registrada:
-                "{nova_descricao}"
-
-                Atenciosamente,
-                Equipe LegalTech."""
+    Nova movimentação registrada: "{nova_descricao}" 
+    
+    Atenciosamente, 
+    Equipe LegalTech."""
 
     mensagem = MIMEText(corpo, "plain", "utf-8")
     
