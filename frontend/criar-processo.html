@@ -16,12 +16,12 @@
       <div class="card shadow-sm p-4">
         <h2 class="mb-4">Novo Processo</h2>
 
-        <form id="processo-form">
+        <form id="form-criar-processo">
           <div class="mb-3">
-            <label for="cliente-select" class="form-label fw-bold"
+            <label for="select-clientes" class="form-label fw-bold"
               >Selecione o Cliente Associado:</label
             >
-            <select id="cliente-select" class="form-select" required>
+            <select id="select-clientes" class="form-select" required>
               <option value="">-- Escolha um cliente --</option>
             </select>
           </div>
@@ -30,11 +30,15 @@
             <label class="form-label fw-bold">Número do Processo (CNJ):</label>
             <input
               type="text"
+              id="numero"
               name="numero"
               class="form-control"
               placeholder="0000000-00.0000.0.00.0000"
               required
             />
+            <small class="text-muted"
+              >O CNJ deve conter exatamente 20 números.</small
+            >
           </div>
 
           <div class="mb-3">
@@ -42,6 +46,7 @@
               >Descrição / Resumo do Caso:</label
             >
             <textarea
+              id="descricao"
               name="descricao"
               class="form-control"
               rows="4"
@@ -52,8 +57,8 @@
 
           <div class="mb-3">
             <label class="form-label fw-bold">Status Inicial:</label>
-            <select name="status" class="form-select" required>
-              <option value="Ativo" selected>Ativo</option>
+            <select id="status" name="status" class="form-select" required>
+              <option value="Ativo">Ativo</option>
               <option value="Suspenso">Suspenso</option>
               <option value="Arquivado">Arquivado</option>
             </select>
@@ -74,44 +79,18 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
     <script src="js/main.js"></script>
 
     <script>
       $(document).ready(function () {
         $("#navbar-container").load("navbar.html");
 
+        $("#numero").inputmask("9999999-99.9999.9.99.9999");
+
         if (typeof popularSelectClientes === "function") {
-          popularSelectClientes("#cliente-select");
+          popularSelectClientes("#select-clientes");
         }
-
-        $("#processo-form").submit(function (e) {
-          e.preventDefault();
-
-          const payload = {
-            cliente_id: parseInt($("#cliente-select").val()),
-            numero: $("#processo-form [name=numero]").val(),
-            descricao: $("#processo-form [name=descricao]").val(),
-            status: $("#processo-form [name=status]").val(),
-          };
-
-          $.ajax({
-            url: "http://127.0.0.1:8000/processos/",
-            method: "POST",
-            contentType: "application/json",
-            data: JSON.stringify(payload),
-            success: function (data) {
-              $("#mensagem").html(
-                `<div class="alert alert-success shadow-sm">Processo criado com sucesso! O e-mail simulado foi gerado no terminal do backend.</div>`,
-              );
-              $("#processo-form")[0].reset();
-            },
-            error: function (xhr) {
-              $("#mensagem").html(
-                `<div class="alert alert-danger shadow-sm">Erro ao criar o processo. Verifique as informações ou o console.</div>`,
-              );
-            },
-          });
-        });
       });
     </script>
   </body>
