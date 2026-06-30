@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Clientes - LegalTech</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="css/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Gestão de Clientes</h1>
+        <a href="criar-clientes.html" class="btn btn-success">Novo Cliente</a>
+      </div>
+
+      <div class="table-responsive shadow-sm rounded">
+        <table class="table table-striped table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Nome</th>
+              <th>CPF/CNPJ</th>
+              <th>Email</th>
+              <th>Telefone</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="clientes-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="container-paginacao-google" class="mt-4"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="js/main.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        $("#navbar-container").load("navbar.html", function () {
+          console.log("Navbar carregada com sucesso!");
+        });
+
+        if (typeof listarClientes === "function") {
+          listarClientes();
+        }
+      });
+    </script>
+  </body>
+</html>

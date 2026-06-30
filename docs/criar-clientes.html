@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Criar Cliente - LegalTech</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="css/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+
+    <div class="container mt-4" style="max-width: 600px">
+      <div class="card shadow-sm p-4">
+        <h2 class="mb-4">Novo Cliente</h2>
+        <form id="cliente-form">
+          <div class="mb-3">
+            <label class="form-label">Nome Completo / Razão Social:</label>
+            <input
+              type="text"
+              name="nome"
+              class="form-control"
+              required
+              minlength="3"
+              maxlength="100"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">CPF / CNPJ (Apenas números):</label>
+            <input
+              type="text"
+              name="cpf_cnpj"
+              id="cpf_cnpj"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">E-mail:</label>
+            <input type="email" name="email" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Telefone (Opcional):</label>
+            <input
+              type="text"
+              name="telefone"
+              id="telefone"
+              class="form-control"
+            />
+          </div>
+          <div class="d-flex justify-content-between mt-4">
+            <a href="index-clientes.html" class="btn btn-secondary">Voltar</a>
+            <button type="submit" class="btn btn-success">
+              Cadastrar Cliente
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        $("#navbar-container").load("navbar.html");
+
+        $("#cpf_cnpj").inputmask({
+          mask: ["999.999.999-99", "99.999.999/9999-99"],
+          keepStatic: true,
+        });
+        $("#telefone").inputmask("(99) 99999-9999");
+
+        $("#cliente-form").submit(function (e) {
+          e.preventDefault();
+
+          const formData = $(this)
+            .serializeArray()
+            .reduce((obj, el) => {
+              obj[el.name] = el.value || null;
+              return obj;
+            }, {});
+
+          $.ajax({
+            url: "http://127.0.0.1:8000/clientes/",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(formData),
+            success: function (data) {
+              exibirToast("Cliente cadastrado com sucesso!", "success");
+              $("#cliente-form")[0].reset();
+              setTimeout(function () {
+                window.location.href = "index-clientes.html";
+              }, 1500);
+            },
+            error: function (xhr) {
+              exibirToast(
+                `Erro ao criar cliente. CPF ou dados já cadastrados (${xhr.status}).`,
+                "danger",
+              );
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
