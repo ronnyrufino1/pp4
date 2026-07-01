@@ -7,8 +7,8 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from sqlmodel import Session, select
 from dotenv import load_dotenv
-from backend.database import get_session
-from backend.models import Usuario
+from database import get_session
+from models import Usuario
 
 load_dotenv()
 

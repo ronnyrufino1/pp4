@@ -9,18 +9,18 @@ from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import SQLModel, create_engine, Session, or_, select, func
 from dotenv import load_dotenv
-from backend.schemas import (
+from schemas import (
     ProcessoUpdate, UsuarioCreate, UsuarioRead, 
     ClienteCreate, ClienteRead, 
     ProcessoCreate, ProcessoRead,
     ProcessoComCliente, ProcessoPaginadoResponse  
 )
-from backend.models import Usuario, Cliente, Processo
-from backend import crud
-from backend.security import gerar_hash_senha, verificar_senha
-from backend.auth import criar_token_acesso, obter_usuario_atual, RequererRole
-from backend.database import engine, get_session
-from backend.email_service import enviar_email_boas_vindas, enviar_email_movimentacao
+from models import Usuario, Cliente, Processo
+import crud
+from security import gerar_hash_senha, verificar_senha
+from auth import criar_token_acesso, obter_usuario_atual, RequererRole
+from database import engine, get_session
+from email_service import enviar_email_boas_vindas, enviar_email_movimentacao
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Servidor iniciando... Criando tabelas!")
@@ -252,13 +252,13 @@ def atualizar_processo_api(
         proc_atualizado = crud.atualizar_processo(id_=id, data=data, session=session)
         
         if proc_atualizado and proc_atualizado.cliente_id:
-            from backend.models import Cliente 
+            from models import Cliente 
             cliente = session.get(Cliente, proc_atualizado.cliente_id)
             
             if cliente and cliente.email:
                 num_proc = proc_atualizado.numero_cnj or proc_atualizado.numero or str(id)
                 
-                from backend.email_service import enviar_email_movimentacao
+                from email_service import enviar_email_movimentacao
                 
                 background_tasks.add_task(
                     enviar_email_movimentacao,

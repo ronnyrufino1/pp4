@@ -29,7 +29,7 @@ def buscar_cliente(id_: int, session: Session) -> Cliente:
 
 def atualizar_cliente(id_: int, data: ClienteCreate, session: Optional[Session] = None) -> Cliente:
     if session is None:
-        from backend.main import engine
+        from main import engine
         with Session(engine) as nova_sessao:
             c = buscar_cliente(id_, nova_sessao)
             for k, v in data.model_dump().items():
@@ -49,7 +49,7 @@ def atualizar_cliente(id_: int, data: ClienteCreate, session: Optional[Session] 
     
 def deletar_cliente(id_: int, session: Optional[Session] = None):
     if session is None:
-        from backend.main import engine
+        from main import engine
         with Session(engine) as nova_sessao:
             c = buscar_cliente(id_, nova_sessao)
             nova_sessao.delete(c)
@@ -110,7 +110,7 @@ def buscar_processo(id_: int, session: Session) -> Processo:
 
 def atualizar_processo(id_: int, data: any, session: Optional[Session] = None) -> Processo:
     if session is None:
-        from backend.main import engine
+        from main import engine
         with Session(engine) as nova_sessao:
             p = buscar_processo(id_, nova_sessao)
             dados_atualizados = data.model_dump(exclude_unset=True) if hasattr(data, "model_dump") else data
@@ -132,7 +132,7 @@ def atualizar_processo(id_: int, data: any, session: Optional[Session] = None) -
 
 def deletar_processo(id_: int, session: Optional[Session] = None):
     if session is None:
-        from backend.main import engine
+        from main import engine
         with Session(engine) as nova_sessao:
             p = buscar_processo(id_, nova_sessao)
             nova_sessao.delete(p)
