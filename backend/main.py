@@ -38,9 +38,13 @@ app = FastAPI(
 # CONFIGURAÇÃO DE CORS PARA PERMITIR O FRONTEND
 # ==============================================
 # ==============================================
+origins = [
+    "https://ronnyrufino1.github.io",
+    "https://pp4.railway.internal", # Se ainda testar local
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
