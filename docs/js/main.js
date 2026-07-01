@@ -1,5 +1,5 @@
 $(document).ready(function () {
-  const BASE_URL = "pp4.railway.internal";
+  const BASE_URL = "https://pp4.railway.internal";
 
   let paginaAtual = 1;
   const itensPorPagina = 10;

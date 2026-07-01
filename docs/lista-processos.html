@@ -91,7 +91,7 @@
 
           if (cid) {
             $.get(
-              `pp4.railway.internal/clientes/${cid}/processos`,
+              `https://pp4.railway.internal/clientes/${cid}/processos`,
               function (data) {
                 const lista = data.dados || data;
                 renderizarTabelaProcessos(lista);

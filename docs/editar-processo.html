@@ -74,7 +74,7 @@
           return;
         }
 
-        $.get(`pp4.railway.internal/processos/${pid}`, function (data) {
+        $.get(`https://pp4.railway.internal/processos/${pid}`, function (data) {
           $("#proc-id").val(pid);
           $("#cliente-id-salvo").val(data.cliente_id);
 
