@@ -1,5 +1,5 @@
 $(document).ready(function () {
-  const BASE_URL = "http://127.0.0.1:8000";
+  const BASE_URL = "pp4.railway.internal";
 
   let paginaAtual = 1;
   const itensPorPagina = 10;
